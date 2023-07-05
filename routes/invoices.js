@@ -1,7 +1,9 @@
 const express = require('express');
-const router = express.Router();
 const db = require("../db");
+const date = require("date-and-time");
+const ExpressError = require("../expressError");
 
+const router = express.Router();
 
 
 app.use(express.json());
@@ -48,9 +50,13 @@ app.post('/invoices', async function(req, res, next){
 app.put('/invoices/:id', async function(req, res, next){
     try {
         const { id } = req.params;
-        const { comp_code, amt, paid, paid_date } = req.body;
-        const results = await db.query(`UPDATE invoices SET comp_code=$1, amt=$2, 
-        paid=$3, paid_date=$4 WHERE id=$5 
+        const { amt, paid } = req.body;
+        
+        const now = new Date();
+        const value = date.format(now, 'YYYY/MM/DD');
+
+        const results = await db.query(`UPDATE invoices SET amt=$1, 
+        paid=$2, paid_date=${value} WHERE id=$3 
         RETURNING comp_code, amt, paid, paid_date`, [comp_code, amt, paid, paid_date, id]);
         return res.json(results.row[0]);
     } catch (err) {
